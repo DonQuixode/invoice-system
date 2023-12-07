@@ -9,7 +9,7 @@ module.exports = app => {
     // User Routes
     router.post('/user/add', formValidator.user_validation, user.addNew);
 
-    router.get('/user/fetch', user.fetch)
+    router.get('/user/fetch', formValidator.user_fetch_validation, user.fetch);
 
     router.put('/user/update', user.update)
     

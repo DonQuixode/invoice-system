@@ -28,4 +28,56 @@ User.create = (newUser, result) => {
   });
 };
 
+User.find = (query, result) =>{
+    console.log(query)
+    pool.query(`SELECT role FROM users WHERE user_id=$1`, [query.user_id], (err, res) =>{
+        if (err) {
+            console.log("ERROR: ", err);
+            result(err, null);
+          }
+        else if (res.rows.length == 0)
+        {
+            result({kind: "not_found"}, null);
+        }
+
+        else if (res.rows[0].role !='admin'){
+            result({kind: "unauthorised"}, null);
+        }
+
+        else
+            executeQuery();
+    });
+
+    function executeQuery(){
+        const conditions = Object.keys(query).map(param =>{
+            if (['name', 'address', 'role'].includes(param)) {
+                return `${param} = '${query[param]}'`;
+            
+            }
+            else if(param == 'user_id'){
+                return null;
+            }
+            else if(param == 'userIdToCheck'){
+                return `user_id = ${query[param]}`
+            }
+             else {
+                return `${param} = ${query[param]}`;
+            }
+        }).filter(condition => condition!== null).join(' AND ');
+        pool.query(`SELECT * FROM users WHERE ${conditions} `, [], (errr, ress)=>{
+            if (errr) {
+                console.log("ERROR: ", errr);
+                result(errr, null);
+              }
+            if(ress.rows.length ==0){
+                result({kind: "not_found"}, null);
+        
+            }
+            else
+            result(null, ress.rows);
+        })    
+    }
+    }
+   
+
 module.exports = User;
