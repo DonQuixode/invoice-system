@@ -1,6 +1,6 @@
 module.exports = app => {
     const user = require('../controllers/user-controller')
-    //const invoice = require('../controllers/invoice-controller')
+    const invoice = require('../controllers/invoice-controller')
     //const payment = require('../controllers/payment-controller')
     const formValidator = require('../middleware/form-validator')
 
@@ -17,17 +17,17 @@ module.exports = app => {
 
     //Invoice Routes
 
-    /* router.post('/invoice/add', invoice.add)
+    router.post('/invoice/add', formValidator.invoice_validation, invoice.add)
 
     router.get('/invoice/fetch', invoice.fetch)
 
-    router.update('/invoice/updateStatus', invoice.updateStatus)
+    router.put('/invoice/updateStatus', invoice.updateStatus)
 
     router.delete('/invoice/delete', invoice.delete)
 
     //Payment Routes
 
-    router.post('/payment/add', payment.add)
+    /* router.post('/payment/add', payment.add)
 
     router.get('/payment/fetch', payment.fetch)
 
