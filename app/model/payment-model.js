@@ -19,6 +19,14 @@ async function checkPaymentStatus(invoice_id) {
             throw error; // Rethrow the error to be caught by the calling function
         }
     }
+async function updateInvoiceStatus(invoice_id){
+    try{
+        const updateQuery = 'UPDATE invoices SET status = $1 WHERE invoice_id = $2';
+        await pool.query(updateQuery, ['COMPLETED', invoice_id]);
+    } catch (error){
+        throw error;
+    }
+}
 
 async function insertPayment(newPayment) {
 const insertInvoiceQuery = `
@@ -80,6 +88,7 @@ Payment.create = async (newPayment, result) => {
 
                     if (paymentDate <= dueDate) {
                         const insertedPayment = await insertPayment(newPayment);
+                        await updateInvoiceStatus(newPayment.invoice_id);
                         console.log("Added Payment: ", insertedPayment);
                         result(null, { message: "success", ...insertedPayment });
                     } else {
