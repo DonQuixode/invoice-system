@@ -71,7 +71,7 @@ async function getUserRole(user_id) {
         }
       } else {
         console.log("Unauthorized");
-        result("unauthorized", null);
+        result({kind: "unauthorised"}, null);
       }
     } catch (errorUser) {
       console.error(errorUser);
