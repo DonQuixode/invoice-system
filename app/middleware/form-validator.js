@@ -103,9 +103,49 @@ exports.invoice_validation = (req, res, next) => {
         });
         return;
     }
-
-    // Additional validation logic can be added here based on specific requirements
-
-    // If all checks pass, move to the next middleware
     next();
 };
+
+exports.payment_validation = (req, res, next) => {
+    if (!req.body) {
+        res.status(400).send({
+            message: "Content cannot be empty"
+        });
+        return;
+    }
+    console.log(req.body);
+    const { invoice_id, payer_id, mode, amount } = req.body;
+
+    if (!invoice_id || !payer_id || !mode || !amount) {
+        res.status(400).send({
+            message: "Invoice ID, Payer ID, Mode, and Amount are required fields"
+        });
+        return;
+    }
+
+    if (!Number.isInteger(invoice_id) || !Number.isInteger(payer_id)) {
+        res.status(400).send({
+            message: "Invoice ID and Payer ID must be integers"
+        });
+        return;
+    }
+
+    if (typeof mode !== 'string' || (mode !== 'online' && mode !== 'offline')) {
+        res.status(400).send({
+            message: "Mode must be either 'online' or 'offline'"
+        });
+        return;
+    }
+
+    if (isNaN(amount) || !Number.isFinite(amount)) {
+        res.status(400).send({
+            message: "Amount must be a decimal number"
+        });
+        return;
+    }
+    next();
+};
+
+
+
+

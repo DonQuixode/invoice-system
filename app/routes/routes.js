@@ -1,7 +1,7 @@
 module.exports = app => {
     const user = require('../controllers/user-controller')
     const invoice = require('../controllers/invoice-controller')
-    //const payment = require('../controllers/payment-controller')
+    const payment = require('../controllers/payment-controller')
     const formValidator = require('../middleware/form-validator')
 
     var router = require('express').Router();
@@ -27,13 +27,13 @@ module.exports = app => {
 
     //Payment Routes
 
-    /* router.post('/payment/add', payment.add)
+    router.post('/payment/add', formValidator.payment_validation, payment.add)
 
     router.get('/payment/fetch', payment.fetch)
 
-    router.update('/payment/updateStatus', payment.updateStatus)
+    router.put('/payment/updateStatus', payment.updateStatus)
 
-    router.delete('/payment/delete', payment.delete) */
+    router.delete('/payment/delete', payment.delete)
 
     app.use('/invoice-system', router);
 };
