@@ -47,35 +47,22 @@ async function getUserRole(user_id) {
     return { "invoice_id": rows[0].invoice_id, ...newInvoice };
   }
   
-  Invoice.create = async (user_id, newInvoice, result) => {
+  Invoice.create = async (newInvoice, result) => {
     try {
-      const userRole = await getUserRole(user_id);
-      console.log("userRole", userRole);
-  
-      if (userRole === 'admin' || (userRole === 'receiver' && user_id === newInvoice.receiver_id)) {
-        try {
-          const payer_role = await getUserRole(newInvoice.payer_id);
-          const receiver_role = await getUserRole(newInvoice.receiver_id);
-  
-          if (payer_role === 'payer' && receiver_role === 'receiver') {
-            const insertedInvoice = await insertInvoice(newInvoice);
-            console.log("Added Invoice: ", insertedInvoice);
-            result(null, { message: "success", ...insertedInvoice });
-          } else {
-            console.log("Invalid roles for payer or receiver.");
-            result({ kind: "invalid_roles" }, null);
-          }
-        } catch (errorPayerReceiver) {
-          console.error(errorPayerReceiver);
-          result({kind: "payer or receiver id wrong"}, null);
-        }
+      const payer_role = await getUserRole(newInvoice.payer_id);
+      const receiver_role = await getUserRole(newInvoice.receiver_id);
+
+      if (payer_role === 'payer' && receiver_role === 'receiver') {
+        const insertedInvoice = await insertInvoice(newInvoice);
+        console.log("Added Invoice: ", insertedInvoice);
+        result(null, { message: "success", ...insertedInvoice });
       } else {
-        console.log("Unauthorized");
-        result({kind: "unauthorised"}, null);
+        console.log("Invalid roles for payer or receiver.");
+        result({ kind: "invalid_roles" }, null);
       }
-    } catch (errorUser) {
-      console.error(errorUser);
-      result({kind: "user_id wrong"}, null);
+    } catch (errorPayerReceiver) {
+      console.error(errorPayerReceiver);
+      result({kind: "payer or receiver id wrong"}, null);
     }
   };
   
