@@ -29,8 +29,8 @@ User.create = (newUser, result) => {
       
     } else {
       // Log success and return the result
-      console.log("Added User: ", { id: res.rows[0].user_id, ...newUser });
-      result(null, { message: "success", id: res.rows[0].user_id, ...newUser });
+      console.log("Added User: ", { id: res.rows[0].user_id });
+      result(null, { message: "success", id: res.rows[0].user_id});
     }
   });
 };

@@ -7,7 +7,13 @@ exports.add = (req, res) =>{
         mode : req.body.mode,
         amount : req.body.amount,
     })
-
+    if(req.session.user.role!='admin'){
+        if (req.session.user.user_id != req.body.payer_id && req.session.user.role!='payer'){
+            res.status(403).send({
+                message: "Only Payer is allowed to pay"
+            });
+        }
+    }
     PaymentModel.create (payment_model, (err, data) =>{
         if(err){
             if(err.kind == 'due_date'){

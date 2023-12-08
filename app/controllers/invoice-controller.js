@@ -8,6 +8,14 @@ exports.add = (req, res) => {
         due_date : req.body.due_date,
         amount : req.body.amount
     })
+    if(req.session.user.role!='admin'){
+        if (req.session.user.user_id != req.body.receiver_id && req.session.user.role == 'receiver'){
+            res.status(403).send({
+                message: "Receiver can add only thier invoice"
+            });
+            return;
+        }
+    }
     InvoiceModel.create(invoice_model, (err, data) =>{
 
         if(err){
