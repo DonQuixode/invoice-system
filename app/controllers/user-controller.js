@@ -4,7 +4,9 @@ exports.addNew = (req, res) => {
     const user_model = new UserModel({
         name : req.body.name,
         address: req.body.address,
-        role: req.body.role
+        role: req.body.role,
+        username: req.body.username,
+        password: req.body.password
     })
     UserModel.create(user_model, (err, data) =>{
 
@@ -27,7 +29,6 @@ exports.addNew = (req, res) => {
 };
 
 exports.fetch = (req, res) =>{
-    console.log(req.query)
     
     UserModel.find(req.query, (err, data) =>{
         if (err){

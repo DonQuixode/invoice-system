@@ -11,11 +11,11 @@ exports.user_validation = (req, res, next) => {
         });
         return; 
     }
-    const { name, address, role } = req.body;
+    const { name, address, role, username, password } = req.body;
 
-    if (!name || !address || !role) {
+    if (!name || !address || !role || !username || !password) {
         res.status(400).send({
-            message: "Name, address, and role are required fields"
+            message: "Name, address, username, password and role are required fields"
         });
         return;
     }
@@ -34,12 +34,6 @@ exports.user_validation = (req, res, next) => {
 }
 
 exports.user_fetch_validation = (req, res, next) => {
-    if (!req.query.user_id) {
-        res.status(400).send({
-            message: "user_id parameter is required"
-        });
-        return;
-    }
 
     const allowedRoles = ['payer', 'admin', 'receiver'];
 
@@ -73,7 +67,6 @@ exports.invoice_validation = (req, res, next) => {
         });
         return;
     }
-    console.log(req.body)
     const { payer_id, receiver_id, initiation_date, due_date, amount } = req.body;
 
     if (!payer_id || !receiver_id || !initiation_date || !due_date || !amount) {
@@ -113,7 +106,6 @@ exports.payment_validation = (req, res, next) => {
         });
         return;
     }
-    console.log(req.body);
     const { invoice_id, payer_id, mode, amount } = req.body;
 
     if (!invoice_id || !payer_id || !mode || !amount) {

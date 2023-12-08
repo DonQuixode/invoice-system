@@ -3,37 +3,36 @@ module.exports = app => {
     const invoice = require('../controllers/invoice-controller')
     const payment = require('../controllers/payment-controller')
     const formValidator = require('../middleware/form-validator')
+    const authenticator = require('../middleware/authenticator')
 
     var router = require('express').Router();
     
     // User Routes
-    router.post('/user/add', formValidator.user_validation, user.addNew);
+    router.post('/user/add', authenticator.authenticate, formValidator.user_validation, user.addNew);
 
-    router.get('/user/fetch', formValidator.user_fetch_validation, user.fetch);
+    router.get('/user/fetch', authenticator.authenticate, formValidator.user_fetch_validation, user.fetch);
 
-    router.put('/user/update', user.update)
+    router.put('/user/update',authenticator.authenticate, user.update)
     
-    router.delete('/user/delete', user.delete)
+    router.delete('/user/delete',authenticator.authenticate, user.delete)
 
     //Invoice Routes
 
-    router.post('/invoice/add', formValidator.invoice_validation, invoice.add)
+    router.post('/invoice/add', authenticator.authenticate, formValidator.invoice_validation, invoice.add)
 
-    router.get('/invoice/fetch', invoice.fetch)
+    router.get('/invoice/fetch', authenticator.authenticate, invoice.fetch)
 
-    router.put('/invoice/updateStatus', invoice.updateStatus)
+    router.put('/invoice/updateStatus', authenticator.authenticate,invoice.updateStatus)
 
-    router.delete('/invoice/delete', invoice.delete)
+    router.delete('/invoice/delete', authenticator.authenticate, invoice.delete)
 
     //Payment Routes
 
-    router.post('/payment/add', formValidator.payment_validation, payment.add)
+    router.post('/payment/add', authenticator.authenticate, formValidator.payment_validation, payment.add)
 
-    router.get('/payment/fetch', payment.fetch)
+    router.get('/payment/fetch',authenticator.authenticate, payment.fetch)
 
-    router.put('/payment/updateStatus', payment.updateStatus)
+    router.delete('/payment/delete', authenticator.authenticate, payment.delete)
 
-    router.delete('/payment/delete', payment.delete)
-
-    app.use('/invoice-system', router);
+    app.use('/invoice-system', authenticator.authenticate,router);
 };
