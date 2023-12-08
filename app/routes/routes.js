@@ -20,7 +20,8 @@ module.exports = app => {
 
     router.put('/user/update', 
         authenticator.authenticate, 
-        authorize.authorize(['admin']), user.update)
+        authorize.authorize(['admin']), 
+        formValidator.user_update_validator, user.update)
     
     router.delete('/user/delete',
         authenticator.authenticate, 

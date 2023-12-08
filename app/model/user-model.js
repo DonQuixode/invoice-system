@@ -89,4 +89,36 @@ User.delete = (id, result) =>{
       });
   }
 
+  User.update = (query, result) => {
+    const { user_id, name, address, role, username, password } = query;
+
+    const conditions = Object.keys(query).map(param => {
+      if (['name','address', 'role', 'username', 'password'].includes(param)) {
+          return `${param} = '${query[param]}'`;
+      } else if (param === 'user_id') {
+          return null;
+      } else {
+          return `${param} = ${query[param]}`;
+      }
+  }).filter(condition => condition !== null).join(' , ');
+
+    const updateQuery = `UPDATE users SET ${conditions} WHERE user_id = ${user_id}`;
+    console.log(conditions)
+    pool.query(updateQuery, [], (err, res) => {
+      if (err) {
+        console.log("ERROR updating user: ", err);
+        result(err, null);
+      } else {
+        if (res.rowCount === 0) {
+          // If no rows were updated, it means the user_id was not found
+          result({ kind: "not_found" }, null);
+        } else {
+          // The user was successfully updated
+          result(null, { message: 'User updated successfully' });
+        }
+      }
+    });
+  };
+    
+
 module.exports = User;
