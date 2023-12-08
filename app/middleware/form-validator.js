@@ -4,6 +4,13 @@ const isValidDate = (dateString) => {
     return dateRegex.test(dateString);
 };
 
+function hasDisallowedParams(allowedParams, query) {
+    const receivedParams = Object.keys(query);
+    const extraParams = receivedParams.filter(param => !allowedParams.includes(param));
+
+    return extraParams.length > 0;
+}
+
 exports.user_validation = (req, res, next) => {
     if (!req.body){
         res.status(400).send({
@@ -34,7 +41,14 @@ exports.user_validation = (req, res, next) => {
 }
 
 exports.user_fetch_validation = (req, res, next) => {
-
+    const allowedParams = ['userIdToCheck', 'name', 'address', 'role'];
+    const extraParams = hasDisallowedParams(allowedParams, req.query);
+    if (extraParams) {
+        res.status(400).send({
+            message: `Invalid parameters`
+        });
+        return;
+    }
     const allowedRoles = ['payer', 'admin', 'receiver'];
 
     if (
@@ -139,9 +153,19 @@ exports.payment_validation = (req, res, next) => {
 };
 
 exports.payment_fetch_validation = (req, res, next) => {
+
+
     const dateRegex = /^\d{2}\/\d{2}\/\d{4}$/;
 
     const { payment_id, invoice_id, mode, date, amount, payer_id } = req.query;
+    const allowedParams = ['payment_id', 'invoice_id', 'mode', 'date', 'amount', 'payer_id'];
+    const extraParams = hasDisallowedParams(allowedParams, req.query);
+    if (extraParams) {
+        res.status(400).send({
+            message: `Invalid parameters`
+        });
+        return;
+    }
     // Check if none of the parameters are present
     if (Object.keys(req.query).length === 0 || (!payment_id && !invoice_id && !mode && !date && !amount && !payer_id)) {
         res.status(400).send({
@@ -197,7 +221,14 @@ exports.payment_fetch_validation = (req, res, next) => {
 
 exports.invoice_fetch_validation = (req, res, next) => {
     const { invoice_id, payer_id, receiver_id, initiation_date, due_date, amount, status } = req.query;
-
+    const allowedParams = ['receiver_id', 'invoice_id', 'initiation_date', 'due_date', 'amount', 'payer_id', 'status'];
+    const extraParams = hasDisallowedParams(allowedParams, req.query);
+    if (extraParams) {
+        res.status(400).send({
+            message: `Invalid parameters`
+        });
+        return;
+    }
     // Check if at least one parameter is present
     if (!invoice_id && !payer_id && !receiver_id && !initiation_date && !due_date && !amount && !status) {
         res.status(400).send({
@@ -300,6 +331,94 @@ exports.id_validator = (req, res, next) => {
     // If all checks pass, move to the next middleware
     next();
 };
+
+exports.invoice_status_validator = (req, res, next) => {
+    const { invoice_id, status } = req.query;
+
+    if (!invoice_id || !status) {
+        res.status(400).send({
+            message: "Invoice ID and Status are required parameters"
+        });
+        return;
+    }
+
+    if (!Number.isInteger(Number(invoice_id))) {
+        res.status(400).send({
+            message: "Invoice ID must be an integer"
+        });
+        return;
+    }
+
+    const validStatusValues = ['PENDING', 'REJECTED', 'COMPLETED'];
+    if (!validStatusValues.includes(status)) {
+        res.status(400).send({
+            message: "Status must be one of: PENDING, REJECTED, COMPLETED"
+        });
+        return;
+    }
+
+    next();
+};
+
+exports.user_update_validator = (req, res, next) => {
+    const { user_id, name, username, password, address, role } = req.body;
+    // Check for extra parameters in req.body
+    const allowedParams = ['user_id', 'name', 'username', 'password', 'address', 'role'];
+    const extraParams = hasDisallowedParams(allowedParams, req.body);
+    if (extraParams) {
+        res.status(400).send({
+            message: `Invalid parameters`
+        });
+        return;
+    }
+    if (!user_id) {
+        res.status(400).send({
+            message: "User ID is required"
+        });
+        return;
+    }
+
+    if (name && typeof name !== 'string') {
+        res.status(400).send({
+            message: "Name must be a string"
+        });
+        return;
+    }
+
+    if (username && typeof username !== 'string') {
+        res.status(400).send({
+            message: "Username must be a string"
+        });
+        return;
+    }
+
+    if (password && typeof password !== 'string') {
+        res.status(400).send({
+            message: "Password must be a string"
+        });
+        return;
+    }
+
+    if (address && typeof address !== 'string') {
+        res.status(400).send({
+            message: "User Address must be a string"
+        });
+        return;
+    }
+
+    if (role) {
+        const validRoles = ['admin', 'payer', 'receiver'];
+        if (!validRoles.includes(role)) {
+            res.status(400).send({
+                message: "Role must be one of: admin, payer, receiver"
+            });
+            return;
+        }
+    }
+
+    next();
+};
+
 
 
 
