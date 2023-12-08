@@ -29,8 +29,8 @@ User.create = (newUser, result) => {
       
     } else {
       // Log success and return the result
-      console.log("Added User: ", { id: res.rows[0].user_id, ...newUser });
-      result(null, { message: "success", id: res.rows[0].user_id, ...newUser });
+      console.log("Added User: ", { id: res.rows[0].user_id });
+      result(null, { message: "success", id: res.rows[0].user_id});
     }
   });
 };
@@ -68,6 +68,25 @@ User.find = (query, result) =>{
         })    
     }
     }
-   
+
+User.delete = (id, result) =>{
+    
+    const deleteQuery = 'DELETE FROM users WHERE user_id = $1';
+  
+    pool.query(deleteQuery, [id], (err, res) => {
+        if (err) {
+          console.log("ERROR deleting user: ", err);
+          result(err, null);
+        } else {
+          if (res.rowCount === 0) {
+            // If no rows were deleted, it means the payment_id was not found
+            result({ kind: "not_found" }, null);
+          } else {
+            // The payment was successfully deleted
+            result(null, { message: 'User deleted successfully' });
+          }
+        }
+      });
+  }
 
 module.exports = User;

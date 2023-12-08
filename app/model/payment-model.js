@@ -1,5 +1,12 @@
 const pool = require('./db')
 const today = new Date().toISOString().split('T')[0];
+const moment = require('moment'); // Import the moment library for date parsing
+
+
+function parseDate(dateString) {
+    // Parse the date string in DD/MM/YYYY format
+    return moment(dateString, 'DD/MM/YYYY').format('YYYY-MM-DD');
+  }
 
 async function getInvoice(invoice_id) {
     try {
@@ -112,5 +119,53 @@ Payment.create = async (newPayment, result) => {
     }
 };
 
+Payment.find = (query, result) => {
+    
+        const conditions = Object.keys(query).map(param => {
+            if (['mode'].includes(param)) {
+                return `${param} = '${query[param]}'`;
+            } else if (param === 'date') {
+                // Convert dueDate from DD/MM/YYYY to YYYY-MM-DD
+                date_string = parseDate(query[param])
+                return `${param} = '${date_string}'`;
+            } else {
+                return `${param} = ${query[param]}`;
+            }
+        }).filter(condition => condition !== null).join(' AND ');
+        console.log(conditions)
+        pool.query(`SELECT * FROM payments WHERE ${conditions} `, [], (err, res) => {
+            if (err) {
+                console.log("ERROR: ", err);
+                result(err, null);
+            }
 
+            if (res.rows.length === 0) {
+                result({ kind: "not_found" }, null);
+            } else {
+                result(null, res.rows)
+            }
+        });
+    
+    
+};
+
+Payment.delete = (id, result) =>{
+    
+    const deleteQuery = 'DELETE FROM payments WHERE payment_id = $1';
+
+    pool.query(deleteQuery, [id], (err, res) => {
+        if (err) {
+          console.log("ERROR deleting payment: ", err);
+          result(err, null);
+        } else {
+          if (res.rowCount === 0) {
+            // If no rows were deleted, it means the payment_id was not found
+            result({ kind: "not_found" }, null);
+          } else {
+            // The payment was successfully deleted
+            result(null, { message: 'Payment deleted successfully' });
+          }
+        }
+      });
+}
 module.exports = Payment;

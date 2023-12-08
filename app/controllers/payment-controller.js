@@ -7,7 +7,13 @@ exports.add = (req, res) =>{
         mode : req.body.mode,
         amount : req.body.amount,
     })
-
+    if(req.session.user.role!='admin'){
+        if (req.session.user.user_id != req.body.payer_id && req.session.user.role!='payer'){
+            res.status(403).send({
+                message: "Only Payer is allowed to pay"
+            });
+        }
+    }
     PaymentModel.create (payment_model, (err, data) =>{
         if(err){
             if(err.kind == 'due_date'){
@@ -53,7 +59,26 @@ exports.add = (req, res) =>{
 };
 
 exports.fetch = (req, res) =>{
+    
+    PaymentModel.find(req.query, (err, data) =>{
+        if (err){
+            if(err.kind == 'unauthorised'){
+                res.status(401).send({"message": "You're not authorised"});
+                return;
+            }
+            else if(err.kind == 'not_found'){
+                res.status(404).send({"message": "payment not found"});
+                return;
+            }
+            else
+            res.status(500).send({
+                message: err.message|| "Some error"});
 
+        }
+        else
+        res.send(data);
+        return;
+    })
 };
 
 exports.updateStatus = (req, res) =>{
@@ -61,6 +86,19 @@ exports.updateStatus = (req, res) =>{
 };
 
 exports.delete = (req, res) =>{
-
+    PaymentModel.delete(req.query.payment_id, (err, data)=>{
+        if (err){
+            if(err.kind == 'not_found'){
+                res.status(404).send({"message": "payment not found"});
+                return;
+            }
+            else
+            res.status(500).send({
+                message: err.message|| "Some error"});
+        }
+        else
+        res.send(data);
+        return;
+    })
 };
 

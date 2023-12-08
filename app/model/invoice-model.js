@@ -47,24 +47,68 @@ async function getUserRole(user_id) {
     return { "invoice_id": rows[0].invoice_id, ...newInvoice };
   }
   
-  Invoice.create = async (newInvoice, result) => {
-    try {
-      const payer_role = await getUserRole(newInvoice.payer_id);
-      const receiver_role = await getUserRole(newInvoice.receiver_id);
+  Invoice.find = (req, result) => {
+    executeQuery();
 
-      if (payer_role === 'payer' && receiver_role === 'receiver') {
-        const insertedInvoice = await insertInvoice(newInvoice);
-        console.log("Added Invoice: ", insertedInvoice);
-        result(null, { message: "success", ...insertedInvoice });
-      } else {
-        console.log("Invalid roles for payer or receiver.");
-        result({ kind: "invalid_roles" }, null);
-      }
-    } catch (errorPayerReceiver) {
-      console.error(errorPayerReceiver);
-      result({kind: "payer or receiver id wrong"}, null);
+    function executeQuery() {
+        const conditions = Object.keys(req.query).map(param => {
+            if (['status'].includes(param)) {
+                return `${param} = '${req.query[param]}'`;
+            } else if (param === 'due_date' || param === 'inititation_date') {
+                // Convert dueDate from DD/MM/YYYY to YYYY-MM-DD
+                date_string = parseDate(req.query[param])
+                return `${param} = '${dateString}'`;
+            } else {
+                return `${param} = ${req.query[param]}`;
+            }
+        }).filter(condition => condition !== null).join(' AND ');
+
+        pool.query(`SELECT * FROM invoices WHERE ${conditions} `, [], (err, res) => {
+            if (err) {
+                console.log("ERROR: ", err);
+                result(err, null);
+            }
+
+            if (res.rows.length === 0) {
+                result({ kind: "not_found" }, null);
+            } else {
+                if(req.session.user.role ==='admin')
+                result(null, res.rows);
+                else if(req.session.user.role=='receiver'){
+                  const filteredInvoices = res.rows.filter(invoice => invoice.receiver_id == req.session.user.user_id);
+                  if(filteredInvoices.length == 0){
+                    result({kind: "unathorised"}, null);
+                  }
+                  else
+                  result(null, filteredInvoices)
+                }
+                else
+                result({kind: "unathorised"}, null)
+
+            }
+        });
     }
-  };
+};
+
+Invoice.delete = (id, result) =>{
+    
+  const deleteQuery = 'DELETE FROM invoices WHERE invoice_id = $1';
+
+  pool.query(deleteQuery, [id], (err, res) => {
+      if (err) {
+        console.log("ERROR deleting payment: ", err);
+        result(err, null);
+      } else {
+        if (res.rowCount === 0) {
+          // If no rows were deleted, it means the payment_id was not found
+          result({ kind: "not_found" }, null);
+        } else {
+          // The payment was successfully deleted
+          result(null, { message: 'Invoice deleted successfully' });
+        }
+      }
+    });
+}
   
 
   module.exports = Invoice

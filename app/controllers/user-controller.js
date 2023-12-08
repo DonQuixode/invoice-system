@@ -56,5 +56,18 @@ exports.update = (req, res) =>{
 };
 
 exports.delete = (req, res) =>{
-
-};
+    UserModel.delete(req.query.user_id, (err, data)=>{
+        if (err){
+            if(err.kind == 'not_found'){
+                res.status(404).send({"message": "User not found"});
+                return;
+            }
+            else
+            res.status(500).send({
+                message: err.message|| "Some error"});
+        }
+        else
+        res.send(data);
+        return;
+    })
+}

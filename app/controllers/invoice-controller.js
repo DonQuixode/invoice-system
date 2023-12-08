@@ -8,6 +8,14 @@ exports.add = (req, res) => {
         due_date : req.body.due_date,
         amount : req.body.amount
     })
+    if(req.session.user.role!='admin'){
+        if (req.session.user.user_id != req.body.receiver_id && req.session.user.role == 'receiver'){
+            res.status(403).send({
+                message: "Receiver can add only thier invoice"
+            });
+            return;
+        }
+    }
     InvoiceModel.create(invoice_model, (err, data) =>{
 
         if(err){
@@ -35,7 +43,25 @@ exports.add = (req, res) => {
 };
 
 exports.fetch = (req, res) =>{
-    
+    InvoiceModel.find(req, (err, data) =>{
+        if (err){
+            if(err.kind == 'unathorised'){
+                res.status(401).send({"message": "You're not authorised"});
+                return;
+            }
+            else if(err.kind == 'not_found'){
+                res.status(404).send({"message": "payment not found"});
+                return;
+            }
+            else
+            res.status(500).send({
+                message: err.message|| "Some error"});
+
+        }
+        else
+        res.send(data);
+        return;
+    })
 }
 
 exports.updateStatus = (req, res) =>{
@@ -43,5 +69,18 @@ exports.updateStatus = (req, res) =>{
 }
 
 exports.delete = (req, res) =>{
-
+    InvoiceModel.delete(req.query.invoice_id, (err, data)=>{
+        if (err){
+            if(err.kind == 'not_found'){
+                res.status(404).send({"message": "Invoice not found"});
+                return;
+            }
+            else
+            res.status(500).send({
+                message: err.message|| "Some error"});
+        }
+        else
+        res.send(data);
+        return;
+    })
 }
