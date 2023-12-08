@@ -301,6 +301,34 @@ exports.id_validator = (req, res, next) => {
     next();
 };
 
+exports.invoice_status_validator = (req, res, next) => {
+    const { invoice_id, status } = req.query;
+
+    if (!invoice_id || !status) {
+        res.status(400).send({
+            message: "Invoice ID and Status are required parameters"
+        });
+        return;
+    }
+
+    if (!Number.isInteger(Number(invoice_id))) {
+        res.status(400).send({
+            message: "Invoice ID must be an integer"
+        });
+        return;
+    }
+
+    const validStatusValues = ['PENDING', 'REJECTED', 'COMPLETED'];
+    if (!validStatusValues.includes(status)) {
+        res.status(400).send({
+            message: "Status must be one of: PENDING, REJECTED, COMPLETED"
+        });
+        return;
+    }
+
+    next();
+};
+
 
 
 

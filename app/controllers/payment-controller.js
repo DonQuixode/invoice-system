@@ -81,10 +81,6 @@ exports.fetch = (req, res) =>{
     })
 };
 
-exports.updateStatus = (req, res) =>{
-
-};
-
 exports.delete = (req, res) =>{
     PaymentModel.delete(req.query.payment_id, (err, data)=>{
         if (err){

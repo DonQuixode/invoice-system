@@ -65,7 +65,20 @@ exports.fetch = (req, res) =>{
 }
 
 exports.updateStatus = (req, res) =>{
-
+    InvoiceModel.updateStatus(req.query, (err, data)=>{
+        if (err){
+            if(err.kind == 'not_found'){
+                res.status(404).send({"message": "Invoice not found"});
+                return;
+            }
+            else
+            res.status(500).send({
+                message: err.message|| "Some error"});
+        }
+        else
+        res.send(data);
+        return;
+    })
 }
 
 exports.delete = (req, res) =>{

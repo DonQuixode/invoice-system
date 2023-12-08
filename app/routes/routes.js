@@ -39,7 +39,7 @@ module.exports = app => {
 
     router.put('/invoice/updateStatus',
         authenticator.authenticate, 
-        authorize.authorize(['admin']), invoice.updateStatus)
+        authorize.authorize(['admin']), formValidator.invoice_status_validator, invoice.updateStatus)
 
     router.delete('/invoice/delete', 
         authenticator.authenticate, 

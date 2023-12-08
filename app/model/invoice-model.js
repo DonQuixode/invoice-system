@@ -109,7 +109,27 @@ Invoice.delete = (id, result) =>{
       }
     });
 }
-  
+
+Invoice.updateStatus = (query, result) => {
+  const {invoice_id, status} = query
+  const updateQuery = 'UPDATE invoices SET status = $1 WHERE invoice_id = $2';
+
+  pool.query(updateQuery, [status, invoice_id], (err, res) => {
+      if (err) {
+          console.log("ERROR updating invoice status: ", err);
+          result(err, null);
+      } else {
+          if (res.rowCount === 0) {
+              // If no rows were updated, it means the invoice_id was not found
+              result({ kind: "not_found" }, null);
+          } else {
+              // The status was successfully updated
+              result(null, { message: 'Invoice status updated successfully' });
+          }
+      }
+  });
+};
+
 
   module.exports = Invoice
   
