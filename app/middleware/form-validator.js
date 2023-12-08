@@ -139,8 +139,6 @@ exports.payment_validation = (req, res, next) => {
 };
 
 exports.payment_fetch_validation = (req, res, next) => {
-    console.log("HERE",req.query);
-
     const dateRegex = /^\d{2}\/\d{2}\/\d{4}$/;
 
     const { payment_id, invoice_id, mode, date, amount, payer_id } = req.query;

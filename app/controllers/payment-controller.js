@@ -60,7 +60,7 @@ exports.add = (req, res) =>{
 
 exports.fetch = (req, res) =>{
     
-    PaymentModel.find(req.query, req.session.user, (err, data) =>{
+    PaymentModel.find(req.query, (err, data) =>{
         if (err){
             if(err.kind == 'unauthorised'){
                 res.status(401).send({"message": "You're not authorised"});
