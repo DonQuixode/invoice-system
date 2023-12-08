@@ -112,5 +112,42 @@ Payment.create = async (newPayment, result) => {
     }
 };
 
+Payment.find = (query, result) => {
+    executeQuery(); // Pass the result parameter to executeQuery
+
+    function executeQuery() {
+        const conditions = Object.keys(query).map(param => {
+            if (['mode'].includes(param)) {
+                return `${param} = '${query[param]}'`;
+            } else if (param === 'date') {
+                // Convert date from DD/MM/YYYY to YYYY-MM-DD
+                const parts = query[param].split('/');
+                const yyyy = parts[2];
+                const mm = parts[1];
+                const dd = parts[0];
+                return `date = '${yyyy}-${mm}-${dd}'`;
+            } else {
+                return `${param} = ${query[param]}`;
+            }
+        }).filter(condition => condition !== null).join(' AND ');
+
+        console.log(conditions);
+
+        pool.query(`SELECT * FROM payments WHERE ${conditions}`, [], (err, res) => {
+            if (err) {
+                console.log("ERROR: ", err);
+                result(err, null);
+            } else {
+                if (res.rows.length === 0) {
+                    result({ kind: "not_found" }, null);
+                } else {
+                    result(null, res.rows);
+                }
+            }
+        });
+    }
+};
+
+
 
 module.exports = Payment;

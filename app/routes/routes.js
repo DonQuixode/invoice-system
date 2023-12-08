@@ -2,6 +2,7 @@ module.exports = app => {
     const user = require('../controllers/user-controller')
     const invoice = require('../controllers/invoice-controller')
     const payment = require('../controllers/payment-controller')
+
     const formValidator = require('../middleware/form-validator')
     const authenticator = require('../middleware/authenticator')
     const authorize = require('../middleware/authorize');
@@ -34,7 +35,7 @@ module.exports = app => {
 
     router.get('/invoice/fetch', 
         authenticator.authenticate, 
-        authorize.authorize(['admin', 'receiver']), invoice.fetch)
+        authorize.authorize(['admin', 'receiver']), formValidator.invoice_fetch_validation, invoice.fetch)
 
     router.put('/invoice/updateStatus',
         authenticator.authenticate, 
@@ -53,7 +54,7 @@ module.exports = app => {
 
     router.get('/payment/fetch', 
         authenticator.authenticate, 
-        authorize.authorize(['admin']), payment.fetch)
+        authorize.authorize(['admin']),formValidator.payment_fetch_validation, payment.fetch)
 
     router.delete('/payment/delete', 
         authenticator.authenticate, 

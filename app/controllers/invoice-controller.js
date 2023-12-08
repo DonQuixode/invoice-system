@@ -43,7 +43,25 @@ exports.add = (req, res) => {
 };
 
 exports.fetch = (req, res) =>{
-    
+    InvoiceModel.find(req, (err, data) =>{
+        if (err){
+            if(err.kind == 'unathorised'){
+                res.status(401).send({"message": "You're not authorised"});
+                return;
+            }
+            else if(err.kind == 'not_found'){
+                res.status(404).send({"message": "payment not found"});
+                return;
+            }
+            else
+            res.status(500).send({
+                message: err.message|| "Some error"});
+
+        }
+        else
+        res.send(data);
+        return;
+    })
 }
 
 exports.updateStatus = (req, res) =>{
