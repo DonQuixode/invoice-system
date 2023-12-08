@@ -267,7 +267,39 @@ exports.invoice_fetch_validation = (req, res, next) => {
     // If all checks pass, move to the next middleware
     next();
 }
+exports.id_validator = (req, res, next) => {
+    const { user_id, invoice_id, payment_id } = req.query;
 
+    // Helper function to check if a value is an integer
+    const isInteger = (value) => Number.isInteger(Number(value));
+
+    // Check if at least one of user_id, invoice_id, or payment_id is provided
+    if (!(user_id || invoice_id || payment_id)) {
+        res.status(400).send({
+            message: "At least one of user_id, invoice_id, or payment_id is required"
+        });
+        return;
+    }
+
+    // Check if the provided values are integers
+    const validateInteger = (param, paramName) => {
+        if (param && !isInteger(param)) {
+            res.status(400).send({
+                message: `${paramName} must be an integer`
+            });
+            return true;
+        }
+        return false;
+    };
+
+    // Validate each parameter
+    if (validateInteger(user_id, 'user_id') || validateInteger(invoice_id, 'invoice_id') || validateInteger(payment_id, 'payment_id')) {
+        return;
+    }
+
+    // If all checks pass, move to the next middleware
+    next();
+};
 
 
 

@@ -24,7 +24,7 @@ module.exports = app => {
     
     router.delete('/user/delete',
         authenticator.authenticate, 
-        authorize.authorize(['admin']), user.delete)
+        authorize.authorize(['admin']), formValidator.id_validator, user.delete)
 
     //Invoice Routes
 
@@ -43,7 +43,7 @@ module.exports = app => {
 
     router.delete('/invoice/delete', 
         authenticator.authenticate, 
-        authorize.authorize(['admin']), invoice.delete)
+        authorize.authorize(['admin']), formValidator.id_validator, invoice.delete)
 
     //Payment Routes
 
@@ -58,7 +58,7 @@ module.exports = app => {
 
     router.delete('/payment/delete', 
         authenticator.authenticate, 
-        authorize.authorize(['admin']), payment.delete)
+        authorize.authorize(['admin']), formValidator.id_validator, payment.delete)
 
     app.use('/invoice-system', authenticator.authenticate,router);
 };

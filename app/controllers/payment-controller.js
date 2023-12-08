@@ -86,6 +86,19 @@ exports.updateStatus = (req, res) =>{
 };
 
 exports.delete = (req, res) =>{
-
+    PaymentModel.delete(req.query.payment_id, (err, data)=>{
+        if (err){
+            if(err.kind == 'not_found'){
+                res.status(404).send({"message": "payment not found"});
+                return;
+            }
+            else
+            res.status(500).send({
+                message: err.message|| "Some error"});
+        }
+        else
+        res.send(data);
+        return;
+    })
 };
 

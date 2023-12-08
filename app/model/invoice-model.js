@@ -89,6 +89,26 @@ async function getUserRole(user_id) {
         });
     }
 };
+
+Invoice.delete = (id, result) =>{
+    
+  const deleteQuery = 'DELETE FROM invoices WHERE invoice_id = $1';
+
+  pool.query(deleteQuery, [id], (err, res) => {
+      if (err) {
+        console.log("ERROR deleting payment: ", err);
+        result(err, null);
+      } else {
+        if (res.rowCount === 0) {
+          // If no rows were deleted, it means the payment_id was not found
+          result({ kind: "not_found" }, null);
+        } else {
+          // The payment was successfully deleted
+          result(null, { message: 'Invoice deleted successfully' });
+        }
+      }
+    });
+}
   
 
   module.exports = Invoice

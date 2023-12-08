@@ -148,4 +148,24 @@ Payment.find = (query, result) => {
     
     
 };
+
+Payment.delete = (id, result) =>{
+    
+    const deleteQuery = 'DELETE FROM payments WHERE payment_id = $1';
+
+    pool.query(deleteQuery, [id], (err, res) => {
+        if (err) {
+          console.log("ERROR deleting payment: ", err);
+          result(err, null);
+        } else {
+          if (res.rowCount === 0) {
+            // If no rows were deleted, it means the payment_id was not found
+            result({ kind: "not_found" }, null);
+          } else {
+            // The payment was successfully deleted
+            result(null, { message: 'Payment deleted successfully' });
+          }
+        }
+      });
+}
 module.exports = Payment;
