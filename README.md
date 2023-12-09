@@ -50,15 +50,62 @@ This is a simple invoice system that requires configuration files for the applic
     node index.js
     ```
 
-## Database Schema Design
+# Database Schema
 
-1. **Tables**
+## Users Table
 
-    1. users: to store admin payer and reciever data
-    2. invoice: to store all the initiated invoices data
-    3. payments: to store all the completed payments data by payer
+### Columns
 
-2. **Schema**
+- `user_id`: SERIAL PRIMARY KEY - Unique identifier for each user.
+- `name`: VARCHAR(255) NOT NULL - Name of the user.
+- `address`: VARCHAR(255) NOT NULL - Address of the user.
+- `role`: VARCHAR(10)  NOT NULL CHECK (role IN ('admin', 'payer', 'receiver')) - Role of the user. Can be 'admin', 'payer', or 'receiver'.
+- `username`: VARCHAR(255) NOT NULL - username of the user
+- `password`: VARCHAR(255) NOT NULL - password of the user
+
+### Constraints
+
+- The `user_id` is the primary key, ensuring each user has a unique identifier.
+- `name`, `address`, `username`, `password`, `address`, `role` cannot be NULL.
+- `role` must be one of 'admin', 'payer', or 'receiver'.
+
+## Invoices Table
+
+### Columns
+
+- `invoice_id`: SERIAL PRIMARY KEY - Unique identifier for each invoice.
+- `payer_id`: INTEGER NOT NULL - Foreign key referencing the user_id of the payer.
+- `receiver_id`: INTEGER NOT NULL - Foreign key referencing the user_id of the receiver.
+- `initiation_date`: DATE NOT NULL - Date when the invoice was initiated.
+- `due_date`: DATE NOT NULL - Due date for the invoice.
+- `amount`: DECIMAL(10, 2) NOT NULL - Amount of the invoice.
+- `status`: VARCHAR(20) NOT NULL CHECK (status IN ('PENDING', 'COMPLETED', 'REJECTED')) DEFAULT 'PENDING' - Status of the invoice.
+- `description`: TEXT - Additional description for the invoice.
+
+### Constraints
+
+- The `invoice_id` is the primary key, ensuring each invoice has a unique identifier.
+- `payer_id` and `receiver_id` are foreign keys referencing the `user_id` in the `users` table.
+- `status` must be one of 'PENDING', 'COMPLETED', or 'REJECTED'.
+- The default status is 'PENDING'.
+- The payer and receiver roles are enforced through CHECK constraints.
+
+## Payments Table
+
+### Columns
+
+- `payment_id`: SERIAL PRIMARY KEY - Unique identifier for each payment.
+- `invoice_id`: INTEGER NOT NULL - Foreign key referencing the invoice_id.
+- `payer_id`: INTEGER NOT NULL - Foreign key referencing the user_id of the payer.
+- `mode`: VARCHAR(10) NOT NULL CHECK (mode IN ('offline', 'online')) - Payment mode, can be 'offline' or 'online'.
+- `date`: DATE - Date when the payment was made.
+- `amount`: DECIMAL(10, 2) NOT NULL - Amount of the payment.
+
+### Constraints
+
+- The `payment_id` is the primary key, ensuring each payment has a unique identifier.
+- `invoice_id` is a foreign key referencing the `invoice_id` in the `invoices` table.
+
 
 
 
