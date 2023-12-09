@@ -46,6 +46,27 @@ async function getUserRole(user_id) {
   
     return { "invoice_id": rows[0].invoice_id, ...newInvoice };
   }
+
+  Invoice.create = async (newInvoice, result) => {
+     {
+        try {
+          const payer_role = await getUserRole(newInvoice.payer_id);
+          const receiver_role = await getUserRole(newInvoice.receiver_id);
+
+          if (payer_role === 'payer' && receiver_role === 'receiver') {
+            const insertedInvoice = await insertInvoice(newInvoice);
+            console.log("Added Invoice: ", insertedInvoice);
+            result(null, { message: "success", ...insertedInvoice });
+          } else {
+            console.log("Invalid roles for payer or receiver.");
+            result({ kind: "invalid_roles" }, null);
+          }
+        } catch (errorPayerReceiver) {
+          console.error(errorPayerReceiver);
+          result({kind: "payer or receiver id wrong"}, null);
+        }
+      } 
+  };
   
   Invoice.find = (req, result) => {
     executeQuery();
