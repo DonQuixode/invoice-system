@@ -130,4 +130,5 @@ dist
 .pnp.*
 
 #Config
-/app/config
+/app/config/app-config.js
+/app/config/db-config.js
